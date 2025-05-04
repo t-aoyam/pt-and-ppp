@@ -320,15 +320,16 @@ class LMTrainer:
                     self.steps_to_save = set(steps_to_save)
 
                 def on_step_end(self, args, state, control, **kwargs):
-                    control.should_log = True
+                    # control.should_log = True
                     if state.global_step in self.steps_to_save:
+                        control.should_log = True
                         control.should_evaluate = True
                         # Save the model
                         output_dir = os.path.join(args.output_dir, f"checkpoint-{state.global_step}")
                         os.makedirs(output_dir, exist_ok=True)
                         kwargs['model'].save_pretrained(output_dir)
                         kwargs['tokenizer'].save_pretrained(output_dir)
-                        print(f"Model saved at step {state.global_step}")                                    
+                        print(f"Model saved at step {state.global_step}")
 
             training_args.save_steps = 1_000_000_000_000  # avoid saving besides the custom saving
             training_args.logging_steps = 1_000_000_000_000  # avoid logging besides the custom saving

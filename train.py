@@ -67,12 +67,13 @@ if __name__ == "__main__":
     parser.add_argument("--t_block", default='mlp', help="type of transformer block")
     parser.add_argument("--reg_lambda", type=float, default=0, help="lambda for {syntactic|copying} regularizer")
     parser.add_argument("--smooth", action="store_true", help="regularize every step, default=False")
+    parser.add_argument("--seed", type=int, required=True, help="seed, default is not set")
 
     args = parser.parse_args()
     raw_data, tokenized_data, segmented_data, validation_data, regularization_data,\
-    use_wandb, gpu, config_fp, n_layer, t_block, reg_lambda, smooth =\
+    use_wandb, gpu, config_fp, n_layer, t_block, reg_lambda, smooth, seed =\
         args.raw_data, args.tokenized_data, args.segmented_data, args.validation_data, args.regularization_data,\
-        args.use_wandb, args.gpu, args.config_fp, args.n_layer, args.t_block, args.reg_lambda, args.smooth
+        args.use_wandb, args.gpu, args.config_fp, args.n_layer, args.t_block, args.reg_lambda, args.smooth, args.seed
 
     if not (raw_data or tokenized_data or segmented_data):
         raise IOError("Provide either raw or tokenized data for training.")
@@ -98,6 +99,8 @@ if __name__ == "__main__":
 
     batch_size = int(config_dict['lm_training']['per_device_train_batch_size'])*\
                  int(config_dict['lm_training']['gradient_accumulation_steps'])
+    if seed:
+        config_dict["lmtrainer"]["seed"] = str(seed)
     reg_lambda_code = str(int(math.log10(1/reg_lambda))) if reg_lambda else '0'
     # e.g. gpt2-attn-l2-b4-r3 -> gpt2 with only attention, 2 layers, batch size of 4, lambda = 1/(10^3)
     reg_lambda_code = 'r' + reg_lambda_code  # r for regularization
