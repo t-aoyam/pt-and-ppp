@@ -1,0 +1,20 @@
+{
+"lmtrainer":
+	{
+	"data_size_for_lm": "10_000_000",
+	"data_size_for_tokenizer": "5_000_000",
+	"target_num_toks_for_lm": "100_000_000",
+	"context_length": "1_024",
+	"save_every_n_words": "5_000_000",
+	"seed": "42",
+	"layers_to_unfreeze": []
+	},
+"lm_training":
+	{
+	"learning_rate": "2.5e-4",
+	"lr_scheduler_type": "cosine",
+	"warmup_steps": "2_000",
+	"per_device_train_batch_size": "8",
+	"gradient_accumulation_steps": "8"
+	}
+}
