@@ -285,7 +285,7 @@ class LMTrainer:
                                 )
             print(GPT2Config)
             if self.noise:
-                model = NoisedGPT2LMHeadModel._from_config(config)
+                model = NoisedGPT2LMHeadModel._from_config(config, noise_std=self.noise)
             else:
                 model = AutoModelForCausalLM.from_config(config)
         else:
