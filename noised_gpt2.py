@@ -12,7 +12,7 @@ from typing import Optional, Tuple, Union, List
 
 class NoisedGPT2Block(GPT2Block):
     def __init__(self, config, noise_std, layer_idx=None):
-        super().__init__()
+        super().__init__(config, layer_idx)
         hidden_size = config.hidden_size
         inner_dim = config.n_inner if config.n_inner is not None else 4 * hidden_size
         attention_class = GPT2Attention
