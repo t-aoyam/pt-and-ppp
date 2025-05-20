@@ -9,6 +9,8 @@ from trainer_with_copying_regularizer import TrainerWithCopyingRegularizer
 from trainer_with_smooth_copying_regularizer import TrainerWithSmoothCopyingRegularizer
 from tokenizers import SentencePieceBPETokenizer
 from torch import cuda
+from noised_gpt2 import NoisedGPT2LMHeadModel
+
 logging.basicConfig(level=logging.ERROR)
 
 print("In LMTrainer:")
@@ -46,6 +48,7 @@ class LMTrainer:
                  reg_lambda=None,
                  device=None,
                  report_to=None,
+                 noise=0,
                  smooth=False,
                  # args below will be passed as kwargs (**config['lmtrainer'])
                  seed=None,#42,
@@ -85,6 +88,7 @@ class LMTrainer:
         self.model_train = model_train
         self.device = device
         self.report_to = report_to
+        self.noise = noise
         self.smooth = smooth
 
     def _load_data_from_hub(self):
@@ -280,7 +284,10 @@ class LMTrainer:
                                 **self.lm_config_dict,
                                 )
             print(GPT2Config)
-            model = AutoModelForCausalLM.from_config(config)
+            if self.noise:
+                model = NoisedGPT2LMHeadModel._from_config(config)
+            else:
+                model = AutoModelForCausalLM.from_config(config)
         else:
             logger.info("Loading the pretrained GPT-2")
             model = AutoModelForCausalLM.from_pretrained(self.model_train)

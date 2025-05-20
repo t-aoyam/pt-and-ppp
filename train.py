@@ -9,7 +9,7 @@ from torch import cuda
 
 def main(
         raw_data, tokenized_data, val_fp, reg_fp, output_dir, config_dict,
-        model_name, reg_lambda, device, report_to, smooth):
+        model_name, reg_lambda, device, report_to, noise, smooth):
 
     for cat in config_dict:
         for key in config_dict[cat]:
@@ -44,6 +44,7 @@ def main(
                         reg_lambda=reg_lambda,
                         device=device,
                         report_to=report_to,
+                        noise=noise,
                         smooth=smooth,
                         **config_dict['lmtrainer']
                         )
@@ -67,13 +68,16 @@ if __name__ == "__main__":
     parser.add_argument("--t_block", default='mlp', help="type of transformer block")
     parser.add_argument("--reg_lambda", type=float, default=0, help="lambda for {syntactic|copying} regularizer")
     parser.add_argument("--smooth", action="store_true", help="regularize every step, default=False")
+    parser.add_argument("--noise", type=float, default=0, help="sd for Gaussian noise injected into FFN")
     parser.add_argument("--seed", type=int, required=True, help="seed, default is not set")
 
     args = parser.parse_args()
-    raw_data, tokenized_data, segmented_data, validation_data, regularization_data,\
-    use_wandb, gpu, config_fp, n_layer, t_block, reg_lambda, smooth, seed =\
-        args.raw_data, args.tokenized_data, args.segmented_data, args.validation_data, args.regularization_data,\
-        args.use_wandb, args.gpu, args.config_fp, args.n_layer, args.t_block, args.reg_lambda, args.smooth, args.seed
+    raw_data, tokenized_data, segmented_data, validation_data,\
+    regularization_data, use_wandb, gpu, config_fp, n_layer,\
+    t_block, reg_lambda, smooth, noise, seed =\
+        args.raw_data, args.tokenized_data, args.segmented_data, args.validation_data,\
+        args.regularization_data, args.use_wandb, args.gpu, args.config_fp, args.n_layer,\
+        args.t_block, args.reg_lambda, args.smooth, args.noise, args.seed
 
     if not (raw_data or tokenized_data or segmented_data):
         raise IOError("Provide either raw or tokenized data for training.")
@@ -108,6 +112,8 @@ if __name__ == "__main__":
         reg_lambda_code = 'i'+reg_lambda_code  # i for induction
     if smooth:
         reg_lambda_code = 'c'+reg_lambda_code  # c for continuous
+    if noise:
+        reg_lambda_code = 'n' + str(noise)[0] + str(noise)[2:]
     model_name = f'gpt2-{t_block}-l{n_layer}-b{str(batch_size)}-{reg_lambda_code}'
     model_name += f'-s{str(config_dict["lmtrainer"]["seed"])}'
     output_dir = os.path.join("models", model_name)
@@ -125,5 +131,6 @@ if __name__ == "__main__":
         reg_lambda=reg_lambda,
         device=device,
         report_to=report_to,
+        noise=noise,
         smooth=smooth
     )
