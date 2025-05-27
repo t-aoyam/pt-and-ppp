@@ -9,8 +9,8 @@ models=(
 	)
 
 for model in "${models[@]}"; do
+	model="models/$model"
 	# Run the Python script with the combined argument
-	# SAS
 	python sas_probe.py -m "$model" -b 2 -u
 	python sas_head.py -m "$model"
 
