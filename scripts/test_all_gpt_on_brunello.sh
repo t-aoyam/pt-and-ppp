@@ -1,8 +1,9 @@
 
 models=(
 #	"gpt2-mlp-l2-b4-n50-s1"
+	"gpt2-mlp-l2-b4-n5.0-s1"
 #	"gpt2-mlp-l2-b4-cir2-s2"
-	"gpt2-mlp-l2-b4-cir2-s3"
+#	"gpt2-mlp-l2-b4-cir2-s3"
 #	"gpt2-mlp-l2-b4-cir3-s3"
 #	"gpt2-mlp-l2-b4-r2-s3"
 #	"gpt2-mlp-l2-b4-r3-s3"
@@ -11,8 +12,8 @@ models=(
 for model in "${models[@]}"; do
 	model="models/$model"
 	# Run the Python script with the combined argument
-	python sas_probe.py -m "$model" -b 2 -u
-	python sas_head.py -m "$model"
+#	python sas_probe.py -m "$model" -b 2 -u
+#	python sas_head.py -m "$model"
 
 	# BLiMP
 	python evaluate_on_blimp.py -m "$model"
