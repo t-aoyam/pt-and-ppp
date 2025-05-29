@@ -1,7 +1,7 @@
 
 models=(
 #	"gpt2-mlp-l2-b4-n50-s1"
-	"gpt2-mlp-l2-b4-n50-s1"
+	"gpt2-mlp-l2-b4-n005-s1"
 #	"gpt2-mlp-l2-b4-cir2-s2"
 #	"gpt2-mlp-l2-b4-cir2-s3"
 #	"gpt2-mlp-l2-b4-cir3-s3"
