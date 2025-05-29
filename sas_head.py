@@ -1,6 +1,8 @@
 import os
 import torch, pathlib
 from tqdm import tqdm
+import argparse
+
 # ROOT_DIR = pathlib.Path(__file__).parent.resolve()
 ROOT_DIR = pathlib.Path(os.getcwd()).resolve()
 DATA_DIR = os.path.join(ROOT_DIR, 'data')
@@ -68,7 +70,16 @@ def id2name(idx, num_head):
     return '-'.join([lid, hid])
 
 def main():
-    fns = os.listdir(SAS_PREDS_DIR)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-m', '--model-name', type=str, default=None,
+                        help='model name whose SAS head scores will be computed. default=None')
+    args = parser.parse_args()
+
+    if args.model_name:
+        fns = [fn for fn in os.listdir(SAS_PREDS_DIR) if args.model_name in fn]
+    else:
+        fns = [fn for fn in os.listdir(SAS_PREDS_DIR)]
     for fn in fns:
         print(fn)
 
