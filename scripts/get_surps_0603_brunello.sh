@@ -1,4 +1,4 @@
-models = (
+models=(
 	"gpt2-mlp-l2-b4-n005-s1"
 	"gpt2-mlp-l2-b4-n50-s1"
 )
