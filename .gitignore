@@ -2,6 +2,7 @@
 models/*
 data/*
 wandb/*
+others/*
 !data/rt_data/
 !data/rt_data/*.tsv
 !/data/configs/
