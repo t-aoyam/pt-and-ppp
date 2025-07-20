@@ -49,9 +49,23 @@ pt-and-ppp/
 
 ### Creating Data
 
+See [`data/README.md`](https://github.com/t-aoyam/pt-and-ppp/tree/main/data/README.md) for downloading, generating, and preprocessing data.
+
 ### Training the Model
 
+See `scripts/training_sample.sh` for how to train a model with and without syntax/copying regularization.
+
 ### Evaluating the Model
+
+See `scripts/evaluation_sample.sh` for how to get LM surprisal, SAS and induction head detection, etc.
+
+For $\Delta LL$, you need to (1) obtain by-word LM surprisal, (2) add suprisal values back to the reading time data, and (3) run regression analyses in R.
+
+```
+python -m evaluation.get_surprisal.py -m [model_dir]  # get surprisal
+python -m src.data.hatch.py -m [model_dir]  # put surprisal values back into the reading time data
+Rscript src/evaluation/by_head_analysis.R "$model" NULL NULL  # run regression analyses and obtain delta log-likelihood
+```
 
 ## Citation
 
