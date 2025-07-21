@@ -2,7 +2,6 @@
 Author: Tatsuya
 """
 import os
-os.environ['HF_HOME'] = '/home/tatsuya/data/hf_models/'
 import torch, re, sys
 from tqdm import tqdm
 

@@ -1,5 +1,5 @@
 import os, argparse, torch, glob, json, re, math
-from lm_trainer import LMTrainer
+from src.training.lm_trainer import LMTrainer
 from transformers import AutoModelForCausalLM, GPT2TokenizerFast
 from torch import cuda
 # os.environ['HF_HOME'] = os.path.join(pathlib.Path(__file__).parent.resolve(), 'models')

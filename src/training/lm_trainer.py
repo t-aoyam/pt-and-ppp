@@ -1,15 +1,14 @@
 import os, pathlib, json, pickle, logging
-
 import tqdm
 from datasets import load_dataset, Dataset, DatasetDict
 from transformers import (GPT2TokenizerFast, AutoModelForCausalLM, GPT2Config, Trainer, TrainingArguments,
                           DataCollatorForLanguageModeling, set_seed, TrainerCallback)
-from trainer_with_syntactic_regularizer import TrainerWithSyntacticRegularizer
-from trainer_with_copying_regularizer import TrainerWithCopyingRegularizer
-from trainer_with_smooth_copying_regularizer import TrainerWithSmoothCopyingRegularizer
+from src.training.trainer_with_syntactic_regularizer import TrainerWithSyntacticRegularizer
+from src.training.trainer_with_copying_regularizer import TrainerWithCopyingRegularizer
+from src.training.trainer_with_smooth_copying_regularizer import TrainerWithSmoothCopyingRegularizer
 from tokenizers import SentencePieceBPETokenizer
 from torch import cuda
-from noised_gpt2 import NoisedGPT2LMHeadModel
+from src.models.noised_gpt2 import NoisedGPT2LMHeadModel
 
 logging.basicConfig(level=logging.ERROR)
 
