@@ -11,7 +11,7 @@ others/*
 !/data/surps/*
 !/data/losses/
 !/data/losses/*
-__pycache__/*
+**/__pycache__/
 *.Rproj*
 get_surprisal_oh.py
 .Rproj.user

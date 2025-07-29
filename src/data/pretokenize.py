@@ -1,93 +1,40 @@
-from transformers import GPT2TokenizerFast
+from transformers import GPT2TokenizerFast, AutoTokenizer
 from datasets import load_dataset
-import os, pathlib, json, pickle, tqdm
+import os, pathlib, json, tqdm
 import numpy as np
 
-ROOT_DIR = pathlib.Path(__file__).parent.resolve()
+ROOT_DIR = pathlib.Path(__file__).parent.parent.resolve()
 DATA_DIR = os.path.join(ROOT_DIR, 'data')
 
-# data_size_for_lm = 10_000
-# context_length = 1_024
-# val_size = 1_000
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-m', '--model', default='EleutherAI/pythia-70m',
+                        help='tokenizer, default=EleutherAI/pythia-70m')
+    parser.add_argument('-d', '--data', default='EleutherAI/the_pile_deduplicated', # 'EleutherAI/the_pile'
+                        help='data, default=EleutherAI/the_pile_deduplicated')
+    parser.add_argument('-t', '--train', action='store_true',
+                        help='whether or not to create train')
+    parser.add_argument('-v', '--val', action='store_true',
+                        help='whether or not to create val')
+    parser.add_argument('-ts', '--train_size', type=int, default=1_000_000_000,
+                        help='train size, default is 1B')
+    parser.add_argument('-vs', '--val_size', type=int, default=100_000,
+                        help='train size, default is 100K')
+    parser.add_argument('-to', '--train_output_fn',
+                        help='train output filename')
+    parser.add_argument('-vo', '--val_output_fn',
+                        help='val output filename')
+    return parser.parse_args()
 
-data_size_for_lm = 1_000_000_000
-context_length = 1_024
-val_size = 10_000_000
-
-# data = load_dataset('cc100', 'en', streaming=True)
-data = load_dataset('EleutherAI/the_pile_deduplicated', streaming=True)
-data = data['train']
-tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
-
-def tokenize_cc100(tokenizer):
+def tokenize(data, tokenizer, train_size, val_size, train_output_fn, val_output_fn):
     num_toks = 0
-    # train_texts = []
     train_toks = []
-    for sample in data:
-        # train_texts.append(sample['text'])
-        text = sample['text'].strip('\n').strip()
-        if not text:
-            train_toks.append(tokenizer.eos_token_id)
-            continue
-
-        outputs = tokenizer(
-            text,
-            truncation=False
-        )
-        train_toks.extend(outputs['input_ids'])
-        print(f"\rTokenizing train portion (1B tokens)... {round(len(train_toks) / data_size_for_lm, 5) * 100}%", end="")
-        if len(train_toks) >= data_size_for_lm:
-            break
-
-    # print(f"\nsaving training text...")
-    # with open(os.path.join(DATA_DIR, 'cc100_1b_texts.json'), 'w') as f:
-    #     json.dump(train_texts, f)
-    # train_texts.clear()
-    print(f"saving training token...\n")
-    with open(os.path.join(DATA_DIR, 'cc100_1b_tokens.pkl'), 'wb') as f:
-        pickle.dump(train_toks, f)
-    # np.save(os.path.join(DATA_DIR, 'cc100_1b_tokens.npy'), np.array(train_toks))
-    train_toks.clear()
-
-    # val_texts = []
-    val_toks = []  # discard training portion
-    for sample in data:
-        # val_texts.append(sample['text'])
-        text = sample['text'].strip('\n').strip()
-        if not text:
-            val_toks.append(tokenizer.eos_token_id)
-            continue
-
-        outputs = tokenizer(
-            text,
-            truncation=False
-        )
-        val_toks.extend(outputs['input_ids'])
-        print(f"\rTokenizing validation portion (10M tokens)... {round(len(val_toks) / val_size, 5) * 100}%",
-              end="")
-        if len(val_toks) >= val_size:
-            break
-    # print(f"\nsaving val text...")
-    # with open(os.path.join(DATA_DIR, 'cc100_10m_texts.json'), 'w') as f:
-    #     json.dump(val_texts, f)
-
-    # val_texts.clear()
-    print(f"saving val token...")
-    with open(os.path.join(DATA_DIR, 'cc100_10m_tokens.pkl'), 'wb') as f:
-        pickle.dump(val_toks, f)
-    val_toks.clear()
-    return None
-
-def tokenize_pile(tokenizer):
-    pbar = tqdm.tqdm(total=data_size_for_lm, desc='Tokenizing train portion (1B tokens)...')
-    with open(os.path.join(DATA_DIR, 'pile_1b_tokens_gpt.txt'), 'w') as f:
-        num_toks = 0
-        train_toks = []
-        for sample in data:
+    train = data['train']
+    with open(os.path.join(DATA_DIR, train_output_fn), 'w') as f:
+        for sample in train:
             text = sample['text'].strip('\n').strip()
-            if max([len(word) for word in text.split()]) > 150 or len(text) > 1_000_000:
-                continue
             if not text:
+                train_toks.append(tokenizer.eos_token_id)
                 continue
 
             outputs = tokenizer(
@@ -95,51 +42,64 @@ def tokenize_pile(tokenizer):
                 truncation=False
             )
             train_toks.extend(outputs['input_ids'])
-            train_toks.append(tokenizer.eos_token_id)
-            num_toks += len(train_toks)+1
-            pbar.update(len(train_toks)+1)
-
-            # print(f"\rTokenizing train portion (1B tokens)... {round(num_toks / data_size_for_lm, 5) * 100}%", end="")
-
-            f.write('\n'.join(str(item) for item in train_toks))
-            train_toks = ['']
-            if num_toks >= data_size_for_lm:
+            print(f"\rTokenizing train portion (1B tokens)... {round(len(train_toks) / train_size, 5) * 100}%", end="")
+            if len(train_toks) > 1024:
+                f.write(
+                    json.dumps(
+                        {'input_ids': train_toks[:1024]}
+                    ) + '\n'
+                )
+                train_toks = train_toks[1024:]
+                num_toks += 1024
+            if num_toks >= train_size:
                 break
-    # print(f"\nsaving training text...")
-    # with open(os.path.join(DATA_DIR, 'cc100_1b_texts.json'), 'w') as f:
-    #     json.dump(train_texts, f)
-    # train_texts.clear()
-    # print(f"saving training token...\n")
-    # np.save(os.path.join(DATA_DIR, 'cc100_1b_tokens.npy'), np.array(train_toks))
-    # train_toks.clear()
-    #
-    # # val_texts = []
-    # val_toks = []  # discard training portion
-    # for sample in data:
-    #     # val_texts.append(sample['text'])
-    #     text = sample['text'].strip('\n').strip()
-    #     if not text:
-    #         val_toks.append(tokenizer.eos_token_id)
-    #         continue
-    #
-    #     outputs = tokenizer(
-    #         text,
-    #         truncation=False
-    #     )
-    #     val_toks.extend(outputs['input_ids'])
-    #     print(f"\rTokenizing validation portion (10M tokens)... {round(len(val_toks) / val_size, 5) * 100}%",
-    #           end="")
-    #     if len(val_toks) >= val_size:
-    #         break
-    # # print(f"\nsaving val text...")
-    # # with open(os.path.join(DATA_DIR, 'cc100_10m_texts.json'), 'w') as f:
-    # #     json.dump(val_texts, f)
-    #
-    # # val_texts.clear()
-    # print(f"saving val token...")
-    # with open(os.path.join(DATA_DIR, 'cc100_10m_tokens.pkl'), 'wb') as f:
-    #     pickle.dump(val_toks, f)
-    # val_toks.clear()
-    # return None
+    train_toks.clear()
 
-tokenize_pile(tokenizer)
+    val_toks = []  # discard training portion
+    num_val_toks = 0
+    if 'validation' in data:
+        val = data['validation']
+    else:
+        val = train  # val set will be the train split, after 1B
+    with open(os.path.join(DATA_DIR, val_output_fn), 'w') as f:
+        for sample in val:
+            text = sample['text'].strip('\n').strip()
+            if not text:
+                val_toks.append(tokenizer.eos_token_id)
+                continue
+
+            outputs = tokenizer(
+                text,
+                truncation=False
+            )
+            val_toks.extend(outputs['input_ids'])
+            print(f"\rTokenizing validation portion (10M tokens)... {round(len(val_toks) / val_size, 5) * 100}%",
+                  end="")
+            if len(val_toks) >= 1024:
+                f.write(
+                    json.dumps(
+                        {'input_ids': val_toks[:1024]}
+                    ) + '\n'
+                )
+                val_toks = val_toks[1024:]
+                num_val_toks += 1024
+            if num_val_toks >= val_size:
+                break
+        val_toks.clear()
+    return None
+
+def main():
+    args = parse_args()
+    if 'cc100' in args.data:
+        data = load_dataset(args.data, 'en', streaming=True)
+    else:
+        data = load_dataset(args.data, streaming=True)
+    data = data['train']
+    tokenizer = AutoTokenizer.from_pretrained(args.model)
+
+    tokenize(data, tokenizer, args.train_size, args.val_size)
+
+    return
+
+if __name__ == "__main__":
+    main()

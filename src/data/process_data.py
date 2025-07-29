@@ -19,16 +19,18 @@ import os, argparse
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+ROOT_DIR = pathlib.Path(__file__).parent.parent.parent.resolve()
+RT_DATA_DIR = os.path.join(ROOT_DIR, 'data', 'rt_data')
 
-nsc_fp = r"C:\Users\aozsa\Codes\naturalstories\naturalstories_RTS\all_stories.tok"
-nsc_rts_fp = r"C:\Users\aozsa\Codes\naturalstories\naturalstories_RTS\processed_RTs.tsv"
-dundee_dir = r"C:\Users\aozsa\Codes\neural-networks-read-times\data\human_rts\dundee"
-output_dir = r"C:\Users\aozsa\Codes\sentence-processing-as-icl\data\rt_data"
-provo_rts_fp = r"C:\Users\aozsa\Codes\sentence-processing-as-icl\data\rt_data\Provo_Corpus-Eyetracking_Data.csv"
-provo_fp = r"C:\Users\aozsa\Codes\sentence-processing-as-icl\data\rt_data\Provo_Corpus-Predictability_Norms.csv"
-# meco_fp = r"C:\Users\aozsa\Codes\sentence-processing-as-icl\data\rt_data\joint_data_trimmed.csv"
+nsc_fp = os.path.join(RT_DATA_DIR, 'all_stories.tok')
+nsc_rts_fp = os.path.join(RT_DATA_DIR, 'processed_RTs.tsv')
+dundee_dir = os.path.join(RT_DATA_DIR, 'dundee')
+provo_rts_fp = os.path.join(RT_DATA_DIR, 'Provo_Corpus-Eyetracking_Data.csv')
+provo_fp = os.path.join(RT_DATA_DIR, 'Provo_Corpus-Predictability_Norms.csv')
+# meco_fp = os.path.join(RT_DATA_DIR, 'joint_data_trimmed.csv')
 # fixed MECO below
-meco_fp = r"C:\Users\aozsa\Codes\sentence-processing-as-icl\data\rt_data\MECO_fixed_en.csv"
+meco_fp = os.path.join(RT_DATA_DIR, 'MECO_fixed_en.csv')
+output_dir = RT_DATA_DIR
 
 def get_nsc_stories(nsc_fp):
     # all stories in 1 file

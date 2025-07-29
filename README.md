@@ -69,15 +69,24 @@ Rscript src/evaluation/by_head_analysis.R "$model" NULL NULL  # run regression a
 
 ## Citation
 
-If you use the code in this repo, please cite our paper (official ACL bibtex is coming soon):
+If you use the code in this repo, please cite our paper:
 ```
-@misc{aoyama2025languagemodelsgrowhumanlike,
-      title={Language Models Grow Less Humanlike beyond Phase Transition}, 
-      author={Tatsuya Aoyama and Ethan Wilcox},
-      year={2025},
-      eprint={2502.18802},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL},
-      url={https://arxiv.org/abs/2502.18802}, 
+@inproceedings{aoyama-wilcox-2025-language,
+    title = "Language Models Grow Less Humanlike beyond Phase Transition",
+    author = "Aoyama, Tatsuya  and
+      Wilcox, Ethan",
+    editor = "Che, Wanxiang  and
+      Nabende, Joyce  and
+      Shutova, Ekaterina  and
+      Pilehvar, Mohammad Taher",
+    booktitle = "Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)",
+    month = jul,
+    year = "2025",
+    address = "Vienna, Austria",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2025.acl-long.1214/",
+    pages = "24938--24958",
+    ISBN = "979-8-89176-251-0",
+    abstract = "LMs' alignment with human reading behavior (i.e. psychometric predictive power; PPP) is known to improve during pretraining up to a tipping point, beyond which it either plateaus or degrades. Various factors, such as word frequency, recency bias in attention, and context size, have been theorized to affect PPP, yet there is no current account that explains why such a tipping point exists, and how it interacts with LMs' pretraining dynamics more generally. We hypothesize that the underlying factor is a pretraining phase transition, characterized by the rapid emergence of specialized attention heads. We conduct a series of correlational and causal experiments to show that such a phase transition is responsible for the tipping point in PPP. We then show that, rather than producing attention patterns that contribute to the degradation in PPP, phase transitions alter the subsequent learning dynamics of the model, such that further training keeps damaging PPP."
 }
 ```
